@@ -24,3 +24,12 @@ proguard/
 
 # Log Files
 *.log
+
+# Android Studio files
+*.iml
+*.ipr
+*.iws
+.idea/workspace.xml
+.idea/libraries
+.idea/tasks.xml
+.DS_Store

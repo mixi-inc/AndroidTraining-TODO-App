@@ -77,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
                 list.add(entity);
             }
             ListView listView = (ListView) getActivity().findViewById(R.id.todoList);
-            ArrayAdapter<TodoEntity> adapter = new TodoListItemAdapter(getActivity(), R.layout.todo_list_item, list);
+            ArrayAdapter<TodoEntity> adapter = new TodoListItemAdapter(getActivity(), list);
             listView.setAdapter(adapter);
 
         }

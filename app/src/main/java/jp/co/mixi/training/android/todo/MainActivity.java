@@ -1,15 +1,20 @@
 package jp.co.mixi.training.android.todo;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -61,6 +66,20 @@ public class MainActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             return rootView;
+        }
+
+        public void onStart() {
+            super.onStart();
+            List<TodoEntity> list = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                TodoEntity entity = new TodoEntity();
+                entity.setTitle("title" + i);
+                list.add(entity);
+            }
+            ListView listView = (ListView) getActivity().findViewById(R.id.todoList);
+            ArrayAdapter<TodoEntity> adapter = new TodoListItemAdapter(getActivity(), list);
+            listView.setAdapter(adapter);
+
         }
     }
 }

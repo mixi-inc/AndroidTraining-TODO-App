@@ -65,6 +65,7 @@ public class TodoSaveService extends IntentService {
 
         SharedPreferences sp = getSharedPreferences("todo", MODE_PRIVATE);
         SharedPreferences.Editor edit = sp.edit();
-        edit.putString(uuid,json);
+        edit.putString(uuid, json);
+        edit.apply();
     }
 }

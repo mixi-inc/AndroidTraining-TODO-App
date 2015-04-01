@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class TodoSaveService extends IntentService {
     private static final String TAG = TodoSaveService.class.getSimpleName();
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_SAVE = "jp.co.mixi.training.android.todo.action.save";
+    public static final String ACTION_COMPLETED_SAVE = "jp.mixi.sample.android.intent.action.saveCompleted";
 
     private static final String EXTRA_TODO_JSON = "jp.co.mixi.training.android.todo.extra.todoJson";
 
@@ -67,5 +69,8 @@ public class TodoSaveService extends IntentService {
         SharedPreferences.Editor edit = sp.edit();
         edit.putString(uuid, json);
         edit.apply();
+
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(new Intent(ACTION_COMPLETED_SAVE));
     }
 }

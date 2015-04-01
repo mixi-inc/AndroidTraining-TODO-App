@@ -25,14 +25,12 @@ public class InputTodoActivity extends ActionBarActivity {
                                                 TodoEntity entity = new TodoEntity();
                                                 entity.setTitle(todoText.getText().toString());
                                                 Activity activity = InputTodoActivity.this;
-                                                activity.setResult(Activity.RESULT_OK);
                                                 TodoSaveService.startActionSave(activity, entity);
                                                 activity.finish();
                                             }
                                         }
         );
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

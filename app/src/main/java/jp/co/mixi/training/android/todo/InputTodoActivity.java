@@ -1,9 +1,12 @@
 package jp.co.mixi.training.android.todo;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 
 public class InputTodoActivity extends ActionBarActivity {
@@ -12,6 +15,17 @@ public class InputTodoActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_todo);
+        View submitButton = findViewById(R.id.submit);
+        final EditText todoText = (EditText) findViewById(R.id.input_todo);
+        submitButton.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Activity activity = InputTodoActivity.this;
+                                                activity.setResult(Activity.RESULT_OK);
+                                                activity.finish();
+                                            }
+                                        }
+        );
     }
 
 

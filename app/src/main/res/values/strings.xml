@@ -7,5 +7,6 @@
     <string name="input_todo_label">TODOを入力してください</string>
     <string name="title_activity_input_todo">TODOの入力</string>
     <string name="submit">登録</string>
+    <string name="add_todo_label">追加</string>
 
 </resources>

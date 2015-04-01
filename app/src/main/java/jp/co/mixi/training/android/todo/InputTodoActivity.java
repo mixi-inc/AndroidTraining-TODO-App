@@ -8,6 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import jp.co.mixi.training.android.todo.entity.TodoEntity;
+
 
 public class InputTodoActivity extends ActionBarActivity {
 
@@ -20,8 +22,11 @@ public class InputTodoActivity extends ActionBarActivity {
         submitButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
+                                                TodoEntity entity = new TodoEntity();
+                                                entity.setTitle(todoText.getText().toString());
                                                 Activity activity = InputTodoActivity.this;
                                                 activity.setResult(Activity.RESULT_OK);
+                                                TodoSaveService.startActionSave(activity, entity);
                                                 activity.finish();
                                             }
                                         }

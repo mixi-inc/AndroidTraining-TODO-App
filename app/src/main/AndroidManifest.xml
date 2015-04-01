@@ -20,6 +20,11 @@
             android:name=".InputTodoActivity"
             android:label="@string/title_activity_input_todo" >
         </activity>
+
+        <service
+            android:name=".TodoSaveService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

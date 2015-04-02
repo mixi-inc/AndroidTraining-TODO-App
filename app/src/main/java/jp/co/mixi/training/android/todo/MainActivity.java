@@ -1,23 +1,33 @@
 package jp.co.mixi.training.android.todo;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int INPUT_TODO_REQUEST_CODE = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +67,15 @@ public class MainActivity extends ActionBarActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+        private TodoListItemAdapter todoListItemAdapter;
+        private BroadcastReceiver todoChangeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (todoListItemAdapter == null) return;
+                todoListItemAdapter.clear();
+                todoListItemAdapter.addAll(loadTodo());
+            }
+        };
 
         public PlaceholderFragment() {
         }
@@ -70,15 +89,46 @@ public class MainActivity extends ActionBarActivity {
 
         public void onStart() {
             super.onStart();
+
+            List<TodoEntity> list = loadTodo();
+            ListView listView = (ListView) getActivity().findViewById(R.id.todoList);
+            todoListItemAdapter = new TodoListItemAdapter(getActivity(), list);
+            listView.setAdapter(todoListItemAdapter);
+            View addTodo = getActivity().findViewById(R.id.add_todo);
+            addTodo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.v(TAG, "onClick");
+                    Activity activity = getActivity();
+                    if (activity == null) return;
+                    Intent intent = new Intent(getActivity(), InputTodoActivity.class);
+                    getActivity().startActivity(intent);
+                }
+            });
+            IntentFilter filter = new IntentFilter(TodoSaveService.ACTION_COMPLETED_SAVE);
+
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getActivity());
+            manager.registerReceiver(todoChangeReceiver, filter);
+        }
+
+        @Override
+        public void onStop() {
+            LocalBroadcastManager manager = LocalBroadcastManager.getInstance(getActivity());
+            manager.unregisterReceiver(todoChangeReceiver);
+            super.onStop();
+
+        }
+
+        private List<TodoEntity> loadTodo() {
             List<TodoEntity> list = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                TodoEntity entity = new TodoEntity();
-                entity.setTitle("title" + i);
+            SharedPreferences sp = getActivity().getSharedPreferences("todo", MODE_PRIVATE);
+            Map<String, ?> map = sp.getAll();
+            for (String key : map.keySet()) {
+                String value = (String) map.get(key);
+                TodoEntity entity = TodoEntity.fromJson(value);
                 list.add(entity);
             }
-            ListView listView = (ListView) getActivity().findViewById(R.id.todoList);
-            ArrayAdapter<TodoEntity> adapter = new TodoListItemAdapter(getActivity(), list);
-            listView.setAdapter(adapter);
+            return list;
 
         }
     }

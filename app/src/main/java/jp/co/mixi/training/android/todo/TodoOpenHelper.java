@@ -1,9 +1,17 @@
 package jp.co.mixi.training.android.todo;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
 /**
  * db操作用のクラス
@@ -60,6 +68,52 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         // ここでアップデート条件を判定する
         db.execSQL(TODO_TABLE_DELETE);
         onCreate(db);
+    }
+
+    public long insertTodo(TodoEntity entity) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            Date date = new Date();
+            ContentValues values = new ContentValues();
+            values.put(TODO_COLUMN_NAME_TITLE, entity.getTitle());
+            values.put(COMMON_COLUMN_NAME_CREATE_AT, date.getTime());
+            values.put(COMMON_COLUMN_NAME_UPDATE_AT, date.getTime());
+            long resCount = db.insert(TODO_TABLE_NAME, null, values);
+            db.setTransactionSuccessful();
+            return resCount;
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    /**
+     * Cursorを返されても扱いにくいのでORマッパー的な層を設けてそこで解決するようにする
+     * @return
+     */
+    public List<TodoEntity> loadTodoAll() {
+        SQLiteDatabase db = getReadableDatabase();
+        // 取得するカラムのリストを定義する
+        // 固定的になるので、static finalな定義にしてもいいかもしれない
+        String[] projection = {
+                BaseColumns._ID,
+                TODO_COLUMN_NAME_TITLE,
+        };
+        // クエリの実行
+        // 全件取得なので条件はなし
+        Cursor cursor = db.query(TODO_TABLE_NAME, projection, null, null, null, null, BaseColumns._ID + " DESC");
+        List<TodoEntity> list = new ArrayList<>();
+        // とりあえず最初のレコードに移動する
+        boolean hasNext = cursor.moveToFirst();
+        while (hasNext) {
+            TodoEntity entity = new TodoEntity();
+            entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
+            entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+            list.add(entity);
+            hasNext = cursor.moveToNext();
+        }
+
+        return list;
     }
 
 }

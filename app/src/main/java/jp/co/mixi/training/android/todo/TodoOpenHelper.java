@@ -89,6 +89,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
 
     /**
      * Cursorを返されても扱いにくいのでORマッパー的な層を設けてそこで解決するようにする
+     *
      * @return
      */
     public List<TodoEntity> loadTodoAll() {
@@ -114,6 +115,38 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         }
 
         return list;
+    }
+
+    /**
+     * id指定で取得するメソッド
+     *
+     * @param id 取得するID
+     * @return 取得できたTodoEntity 取得できなかった場合null
+     */
+    public TodoEntity findTodoById(long id) {
+        SQLiteDatabase db = getReadableDatabase();
+        // 取得するカラムのリストを定義する
+        // 固定的になるので、static finalな定義にしてもいいかもしれない
+        String[] projection = {
+                BaseColumns._ID,
+                TODO_COLUMN_NAME_TITLE,
+        };
+        // 条件文
+        String selection = BaseColumns._ID + " = ?";
+        // 条件のパラメータ
+        String[] selectionArgs = {
+                String.valueOf(id)
+        };
+        // クエリの実行
+        Cursor cursor = db.query(TODO_TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+        if (cursor.moveToFirst()) {
+            TodoEntity entity = new TodoEntity();
+            entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
+            entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+            return entity;
+        }
+
+        return null;
     }
 
 }

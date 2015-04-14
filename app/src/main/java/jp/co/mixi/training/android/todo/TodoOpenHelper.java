@@ -79,9 +79,9 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             values.put(TODO_COLUMN_NAME_TITLE, entity.getTitle());
             values.put(COMMON_COLUMN_NAME_CREATE_AT, date.getTime());
             values.put(COMMON_COLUMN_NAME_UPDATE_AT, date.getTime());
-            long resCount = db.insert(TODO_TABLE_NAME, null, values);
+            long resId = db.insert(TODO_TABLE_NAME, null, values);
             db.setTransactionSuccessful();
-            return resCount;
+            return resId;
         } finally {
             db.endTransaction();
         }

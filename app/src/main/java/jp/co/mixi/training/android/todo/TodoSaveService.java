@@ -62,7 +62,11 @@ public class TodoSaveService extends IntentService {
 
         TodoEntity entity = TodoEntity.fromJson(json);
         TodoOpenHelper helper = new TodoOpenHelper(this);
-        long id = helper.insertTodo(entity);
+        if (entity.getId() != 0) {
+            helper.updateTodo(entity);
+        } else {
+            long id = helper.insertTodo(entity);
+        }
 
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(new Intent(ACTION_COMPLETED_SAVE));

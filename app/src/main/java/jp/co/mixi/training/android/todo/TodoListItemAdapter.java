@@ -1,6 +1,7 @@
 package jp.co.mixi.training.android.todo;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,9 +32,19 @@ public class TodoListItemAdapter extends BindableAdapter<TodoEntity> {
     }
 
     @Override
-    public void bindView(TodoEntity item, int position, View view) {
+    public void bindView(final TodoEntity item, int position, View view) {
         ViewHolder holder = (ViewHolder) view.getTag();
         holder.title.setText(item.getTitle());
+        holder.title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = v.getContext();
+                if (context == null) return;
+                Intent intent = new Intent(context, InputTodoActivity.class);
+                intent.putExtra(InputTodoActivity.TODO, item.toJson());
+                context.startActivity(intent);
+            }
+        });
 
     }
 

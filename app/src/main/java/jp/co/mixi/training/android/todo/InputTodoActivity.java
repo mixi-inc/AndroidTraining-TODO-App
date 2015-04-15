@@ -26,9 +26,13 @@ public class InputTodoActivity extends ActionBarActivity {
         final long entityId;
         if (intent != null) {
             String todoJson = intent.getStringExtra(TODO);
-            TodoEntity entity = TodoEntity.fromJson(todoJson);
-            todoText.setText(entity.getTitle());
-            entityId = entity.getId();
+            if (todoJson != null) {
+                TodoEntity entity = TodoEntity.fromJson(todoJson);
+                todoText.setText(entity.getTitle());
+                entityId = entity.getId();
+            } else {
+                entityId = 0;
+            }
         } else {
             entityId = 0;
         }

@@ -62,7 +62,7 @@ public class TodoSaveService extends IntentService {
 
         TodoEntity entity = TodoEntity.fromJson(json);
         TodoOpenHelper helper = new TodoOpenHelper(this);
-        if (entity.getId() != 0) {
+        if (helper.isExist(entity)) {
             helper.updateTodo(entity);
         } else {
             long id = helper.insertTodo(entity);

@@ -24,18 +24,18 @@ public class InputTodoActivity extends ActionBarActivity {
         final EditText todoText = (EditText) findViewById(R.id.input_todo);
         Intent intent = getIntent();
         final long entityId;
+        long paramEntityId = 0;
         if (intent != null) {
+            // 前の画面から渡ってきたパラメータをチェックする
             String todoJson = intent.getStringExtra(TODO);
+            // todoのパラメータが存在していた場合は、初期表示時にその値を表示するようにする
             if (todoJson != null) {
                 TodoEntity entity = TodoEntity.fromJson(todoJson);
                 todoText.setText(entity.getTitle());
-                entityId = entity.getId();
-            } else {
-                entityId = 0;
+                paramEntityId = entity.getId();
             }
-        } else {
-            entityId = 0;
         }
+        entityId = paramEntityId;
         submitButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {

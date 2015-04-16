@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -18,9 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
@@ -68,6 +65,7 @@ public class MainActivity extends ActionBarActivity {
      */
     public static class PlaceholderFragment extends Fragment {
         private TodoListItemAdapter todoListItemAdapter;
+        private TodoOpenHelper todoOpenHelper;
         private BroadcastReceiver todoChangeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -78,6 +76,11 @@ public class MainActivity extends ActionBarActivity {
         };
 
         public PlaceholderFragment() {
+        }
+
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            todoOpenHelper = new TodoOpenHelper(getActivity());
         }
 
         @Override
@@ -101,8 +104,8 @@ public class MainActivity extends ActionBarActivity {
                     Log.v(TAG, "onClick");
                     Activity activity = getActivity();
                     if (activity == null) return;
-                    Intent intent = new Intent(getActivity(), InputTodoActivity.class);
-                    getActivity().startActivity(intent);
+                    Intent intent = new Intent(activity, InputTodoActivity.class);
+                    activity.startActivity(intent);
                 }
             });
             IntentFilter filter = new IntentFilter(TodoSaveService.ACTION_COMPLETED_SAVE);
@@ -120,15 +123,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         private List<TodoEntity> loadTodo() {
-            List<TodoEntity> list = new ArrayList<>();
-            SharedPreferences sp = getActivity().getSharedPreferences("todo", MODE_PRIVATE);
-            Map<String, ?> map = sp.getAll();
-            for (String key : map.keySet()) {
-                String value = (String) map.get(key);
-                TodoEntity entity = TodoEntity.fromJson(value);
-                list.add(entity);
-            }
-            return list;
+            return todoOpenHelper.loadTodoAll();
 
         }
     }

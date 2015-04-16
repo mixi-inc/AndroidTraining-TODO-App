@@ -1,6 +1,7 @@
 package jp.co.mixi.training.android.todo;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -13,16 +14,33 @@ import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
 public class InputTodoActivity extends ActionBarActivity {
 
+    public static final String TODO = "todo";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_input_todo);
         View submitButton = findViewById(R.id.submit);
         final EditText todoText = (EditText) findViewById(R.id.input_todo);
+        Intent intent = getIntent();
+        final long entityId;
+        long paramEntityId = 0;
+        if (intent != null) {
+            // 前の画面から渡ってきたパラメータをチェックする
+            String todoJson = intent.getStringExtra(TODO);
+            // todoのパラメータが存在していた場合は、初期表示時にその値を表示するようにする
+            if (todoJson != null) {
+                TodoEntity entity = TodoEntity.fromJson(todoJson);
+                todoText.setText(entity.getTitle());
+                paramEntityId = entity.getId();
+            }
+        }
+        entityId = paramEntityId;
         submitButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
                                                 TodoEntity entity = new TodoEntity();
+                                                entity.setId(entityId);
                                                 entity.setTitle(todoText.getText().toString());
                                                 Activity activity = InputTodoActivity.this;
                                                 TodoSaveService.startActionSave(activity, entity);

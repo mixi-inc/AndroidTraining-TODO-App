@@ -3,11 +3,8 @@ package jp.co.mixi.training.android.todo;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
-import java.util.UUID;
 
 import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
@@ -61,14 +58,15 @@ public class TodoSaveService extends IntentService {
      * parameters.
      */
     private void handleActionSave(String json) {
-        String uuid = UUID.randomUUID().toString();
-        Log.v(TAG, "uuid:" + uuid);
         Log.v(TAG, "json:" + json);
 
-        SharedPreferences sp = getSharedPreferences("todo", MODE_PRIVATE);
-        SharedPreferences.Editor edit = sp.edit();
-        edit.putString(uuid, json);
-        edit.apply();
+        TodoEntity entity = TodoEntity.fromJson(json);
+        TodoOpenHelper helper = new TodoOpenHelper(this);
+        if (helper.isExist(entity)) {
+            helper.updateTodo(entity);
+        } else {
+            long id = helper.insertTodo(entity);
+        }
 
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(new Intent(ACTION_COMPLETED_SAVE));

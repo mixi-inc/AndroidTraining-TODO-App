@@ -171,4 +171,19 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         }
     }
 
+    /**
+     * 本来はちゃんとチェックすべきだが、簡単なチェックのみにする
+     *
+     * @param entity 存在確認したいtodo
+     * @return
+     */
+    public boolean isExist(TodoEntity entity) {
+        // デフォルト値が0なので、0かをチェック
+        if (entity.getId() != 0) {
+            return true;
+        }
+        return false;
+
+    }
+
 }

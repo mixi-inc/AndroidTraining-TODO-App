@@ -102,16 +102,21 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         };
         // クエリの実行
         // 全件取得なので条件はなし
-        Cursor cursor = db.query(TODO_TABLE_NAME, projection, null, null, null, null, BaseColumns._ID + " DESC");
+        Cursor cursor = null;
         List<TodoEntity> list = new ArrayList<>();
-        // とりあえず最初のレコードに移動する
-        boolean hasNext = cursor.moveToFirst();
-        while (hasNext) {
-            TodoEntity entity = new TodoEntity();
-            entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
-            entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
-            list.add(entity);
-            hasNext = cursor.moveToNext();
+        try {
+            cursor = db.query(TODO_TABLE_NAME, projection, null, null, null, null, BaseColumns._ID + " DESC");
+            // とりあえず最初のレコードに移動する
+            boolean hasNext = cursor.moveToFirst();
+            while (hasNext) {
+                TodoEntity entity = new TodoEntity();
+                entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
+                entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+                list.add(entity);
+                hasNext = cursor.moveToNext();
+            }
+        } finally {
+            if (cursor != null) cursor.close();
         }
 
         return list;

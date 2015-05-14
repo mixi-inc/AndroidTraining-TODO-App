@@ -117,6 +117,7 @@ public class TodoOpenHelperTest extends AndroidTestCase {
         result = helper.findTodoById(1);
         assertEquals("fuga", result.getTitle());
     }
+
     @Test
     public void testUpdateTodoNotExists() throws Exception {
         TodoEntity updateEntity = new TodoEntity();
@@ -137,7 +138,7 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     @Test
     public void testGetDatabaseName() throws Exception {
-
+        assertEquals("Todo.db", helper.getDatabaseName());
     }
 
     private String getInsertSql(String tableName, int id, String title) {

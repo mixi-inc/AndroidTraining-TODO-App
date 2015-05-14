@@ -85,7 +85,20 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     @Test
     public void testFindTodoById() throws Exception {
+        int listCount = 5;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        for (int i = 0; i < listCount; i++) {
+            db.execSQL(getInsertSql("todo", i, "title" + i));
+        }
 
+        for (int i = 0; i < listCount; i++) {
+            TodoEntity entity = helper.findTodoById(i);
+            assertEquals(i, entity.getId());
+            assertEquals("title" + i, entity.getTitle());
+        }
+        // 存在しないidはnull
+        TodoEntity entity = helper.findTodoById(listCount);
+        assertNull(entity);
     }
 
     @Test

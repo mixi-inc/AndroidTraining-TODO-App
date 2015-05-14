@@ -127,7 +127,12 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     @Test
     public void testIsExist() throws Exception {
-
+        TodoEntity entity = new TodoEntity();
+        entity.setId(1);
+        entity.setTitle("hoge");
+        assertTrue(helper.isExist(entity));
+        entity.setId(0);
+        assertFalse(helper.isExist(entity));
     }
 
     @Test

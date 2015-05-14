@@ -64,7 +64,23 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     @Test
     public void testLoadTodoAll() throws Exception {
+        int listCount = 5;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        for (int i = 0; i < listCount; i++) {
+            db.execSQL(getInsertSql("todo", i, "title" + i));
+        }
+
+        // exec
         List<TodoEntity> results = helper.loadTodoAll();
+
+        assertEquals(listCount, results.size());
+        for (int i = 0; i < listCount; i++) {
+            TodoEntity entity = results.get(i);
+            long id = listCount - 1 - i;
+            assertEquals(id, entity.getId());
+            assertEquals("title" + id, entity.getTitle());
+
+        }
     }
 
     @Test
@@ -87,4 +103,10 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     }
 
+    private String getInsertSql(String tableName, int id, String title) {
+        Date date = new Date();
+        return String.format("insert into %s(_id,title,create_at,update_at) values(%d,\"%s\",%d,%d)",
+                tableName, id, title, date.getTime(), date.getTime());
+
+    }
 }

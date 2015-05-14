@@ -22,7 +22,7 @@ import jp.co.mixi.training.android.todo.entity.TodoEntity;
 public class TodoOpenHelper extends SQLiteOpenHelper {
 
     // データベースのマイグレーションNOと考える
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // DB設定
     public static final String DATABASE_NAME = "Todo.db";
@@ -44,30 +44,50 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
     public static final String TODO_TABLE_NAME = "todo";
     // カラム名を定義していく
     public static final String TODO_COLUMN_NAME_TITLE = "title";
+    public static final String TODO_COLUMN_NAME_DEADLINE = "deadline";
 
-    private static final String TODO_TABLE_CREATE =
+    private static final String TODO_TABLE_CREATE_V1 =
             "CREATE TABLE " + TODO_TABLE_NAME + " (" +
                     BaseColumns._ID + TYPE_INTEGER + CONSTRAINT_PRIMARY_KEY + ", " +
                     TODO_COLUMN_NAME_TITLE + TYPE_TEXT + CONSTRAINT_NOT_NULL + ", " +
                     COMMON_COLUMN_NAME_CREATE_AT + TYPE_INTEGER + CONSTRAINT_NOT_NULL + ", " +
                     COMMON_COLUMN_NAME_UPDATE_AT + TYPE_INTEGER + CONSTRAINT_NOT_NULL +
                     ");";
+    private static final String TODO_TABLE_CREATE_V2 =
+            "CREATE TABLE " + TODO_TABLE_NAME + " (" +
+                    BaseColumns._ID + TYPE_INTEGER + CONSTRAINT_PRIMARY_KEY + ", " +
+                    TODO_COLUMN_NAME_TITLE + TYPE_TEXT + CONSTRAINT_NOT_NULL + ", " +
+                    TODO_COLUMN_NAME_DEADLINE + TYPE_INTEGER + ", " +
+                    COMMON_COLUMN_NAME_CREATE_AT + TYPE_INTEGER + CONSTRAINT_NOT_NULL + ", " +
+                    COMMON_COLUMN_NAME_UPDATE_AT + TYPE_INTEGER + CONSTRAINT_NOT_NULL +
+                    ");";
     private static final String TODO_TABLE_DELETE = "DROP TABLE IF EXISTS " + TODO_TABLE_NAME;
+    private static final String ALTER_TABLE_FOR_V2 = "alter table " + TODO_TABLE_NAME + " add column " + TODO_COLUMN_NAME_DEADLINE + " " + TYPE_INTEGER;
 
+    private final int currentVersion;
+    /* package */ TodoOpenHelper(Context context, int version) {
+        super(context, DATABASE_NAME, null, version);
+        currentVersion =version;
+    }
     public TodoOpenHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this(context, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(TODO_TABLE_CREATE);
+        if (currentVersion == 1) {
+            db.execSQL(TODO_TABLE_CREATE_V1);
+            return;
+        }
+        db.execSQL(TODO_TABLE_CREATE_V2);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // ここでアップデート条件を判定する
-        db.execSQL(TODO_TABLE_DELETE);
-        onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL(ALTER_TABLE_FOR_V2);
+        }
     }
 
     public long insertTodo(TodoEntity entity) {
@@ -77,6 +97,11 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             Date date = new Date();
             ContentValues values = new ContentValues();
             values.put(TODO_COLUMN_NAME_TITLE, entity.getTitle());
+            if (entity.getDeadline() == null) {
+                values.putNull(TODO_COLUMN_NAME_DEADLINE);
+            } else {
+                values.put(TODO_COLUMN_NAME_DEADLINE, entity.getDeadline().getTime());
+            }
             values.put(COMMON_COLUMN_NAME_CREATE_AT, date.getTime());
             values.put(COMMON_COLUMN_NAME_UPDATE_AT, date.getTime());
             long resId = db.insert(TODO_TABLE_NAME, null, values);
@@ -99,6 +124,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         String[] projection = {
                 BaseColumns._ID,
                 TODO_COLUMN_NAME_TITLE,
+                TODO_COLUMN_NAME_DEADLINE,
         };
         // クエリの実行
         // 全件取得なので条件はなし
@@ -112,6 +138,9 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
                 TodoEntity entity = new TodoEntity();
                 entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
                 entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+                if (!cursor.isNull(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE))) {
+                    entity.setDeadline(cursor.getLong(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE)));
+                }
                 list.add(entity);
                 hasNext = cursor.moveToNext();
             }
@@ -135,6 +164,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         String[] projection = {
                 BaseColumns._ID,
                 TODO_COLUMN_NAME_TITLE,
+                TODO_COLUMN_NAME_DEADLINE,
         };
         // 条件文
         String selection = BaseColumns._ID + " = ?";
@@ -148,6 +178,9 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             TodoEntity entity = new TodoEntity();
             entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
             entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+            if (!cursor.isNull(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE))) {
+                entity.setDeadline(cursor.getLong(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE)));
+            }
             return entity;
         }
 
@@ -167,6 +200,11 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             Date date = new Date();
             ContentValues values = new ContentValues();
             values.put(TODO_COLUMN_NAME_TITLE, entity.getTitle());
+            if (entity.getDeadline() == null) {
+                values.putNull(TODO_COLUMN_NAME_DEADLINE);
+            } else {
+                values.put(TODO_COLUMN_NAME_DEADLINE, entity.getDeadline().getTime());
+            }
             values.put(COMMON_COLUMN_NAME_UPDATE_AT, date.getTime());
             int count = db.update(TODO_TABLE_NAME, values, selection, selectionArgs);
             db.setTransactionSuccessful();

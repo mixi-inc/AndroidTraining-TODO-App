@@ -1,12 +1,17 @@
 package jp.co.mixi.training.android.todo;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Date;
+import java.util.List;
 
 import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
@@ -35,18 +40,31 @@ public class TodoOpenHelperTest extends AndroidTestCase {
     }
 
     @Test
+    public void testOnUpgrade() throws Exception {
+    }
+
+    @Test
     public void testInsertTodo() throws Exception {
         TodoEntity entity = new TodoEntity();
         entity.setId(1);
-        entity.setTitle("title");
+        entity.setTitle("sample");
         helper.insertTodo(entity);
-
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor c = null;
+        try {
+            c = db.rawQuery("select * from todo", null);
+            c.moveToFirst();
+            assertEquals(1, c.getCount());
+            assertEquals("sample", c.getString(c.getColumnIndex("title")));
+            assertEquals(1, c.getLong(c.getColumnIndex("_id")));
+        } finally {
+            if (c != null) c.close();
+        }
     }
 
     @Test
     public void testLoadTodoAll() throws Exception {
-        helper.loadTodoAll();
-
+        List<TodoEntity> results = helper.loadTodoAll();
     }
 
     @Test

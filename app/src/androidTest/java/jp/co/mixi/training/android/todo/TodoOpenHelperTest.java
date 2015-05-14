@@ -103,7 +103,26 @@ public class TodoOpenHelperTest extends AndroidTestCase {
 
     @Test
     public void testUpdateTodo() throws Exception {
-
+        TodoEntity entity = new TodoEntity();
+        entity.setId(1);
+        entity.setTitle("hoge");
+        helper.insertTodo(entity);
+        TodoEntity result = helper.findTodoById(1);
+        assertEquals("hoge", result.getTitle());
+        TodoEntity updateEntity = new TodoEntity();
+        updateEntity.setId(1);
+        updateEntity.setTitle("fuga");
+        int count = helper.updateTodo(updateEntity);
+        assertEquals(1, count);
+        result = helper.findTodoById(1);
+        assertEquals("fuga", result.getTitle());
+    }
+    @Test
+    public void testUpdateTodoNotExists() throws Exception {
+        TodoEntity updateEntity = new TodoEntity();
+        updateEntity.setId(1);
+        updateEntity.setTitle("fuga");
+        assertEquals(0, helper.updateTodo(updateEntity));
     }
 
     @Test

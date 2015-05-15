@@ -65,10 +65,12 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
     private static final String ALTER_TABLE_FOR_V2 = "alter table " + TODO_TABLE_NAME + " add column " + TODO_COLUMN_NAME_DEADLINE + " " + TYPE_INTEGER;
 
     private final int currentVersion;
+
     /* package */ TodoOpenHelper(Context context, int version) {
         super(context, DATABASE_NAME, null, version);
-        currentVersion =version;
+        currentVersion = version;
     }
+
     public TodoOpenHelper(Context context) {
         this(context, DATABASE_VERSION);
     }
@@ -91,9 +93,10 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
     }
 
     public long insertTodo(TodoEntity entity) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        SQLiteDatabase db = null;
         try {
+            db = getWritableDatabase();
+            db.beginTransaction();
             Date date = new Date();
             ContentValues values = new ContentValues();
             values.put(TODO_COLUMN_NAME_TITLE, entity.getTitle());
@@ -108,7 +111,10 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
             return resId;
         } finally {
-            db.endTransaction();
+            if (db != null) {
+                db.endTransaction();
+                db.close();
+            }
         }
     }
 
@@ -118,7 +124,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
      * @return
      */
     public List<TodoEntity> loadTodoAll() {
-        SQLiteDatabase db = getReadableDatabase();
+        SQLiteDatabase db = null;
         // 取得するカラムのリストを定義する
         // 固定的になるので、static finalな定義にしてもいいかもしれない
         String[] projection = {
@@ -131,6 +137,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
         Cursor cursor = null;
         List<TodoEntity> list = new ArrayList<>();
         try {
+            db = getReadableDatabase();
             cursor = db.query(TODO_TABLE_NAME, projection, null, null, null, null, BaseColumns._ID + " DESC");
             // とりあえず最初のレコードに移動する
             boolean hasNext = cursor.moveToFirst();
@@ -146,6 +153,7 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             }
         } finally {
             if (cursor != null) cursor.close();
+            if (db != null) db.close();
         }
 
         return list;
@@ -158,39 +166,46 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
      * @return 取得できたTodoEntity 取得できなかった場合null
      */
     public TodoEntity findTodoById(long id) {
-        SQLiteDatabase db = getReadableDatabase();
-        // 取得するカラムのリストを定義する
-        // 固定的になるので、static finalな定義にしてもいいかもしれない
-        String[] projection = {
-                BaseColumns._ID,
-                TODO_COLUMN_NAME_TITLE,
-                TODO_COLUMN_NAME_DEADLINE,
-        };
-        // 条件文
-        String selection = BaseColumns._ID + " = ?";
-        // 条件のパラメータ
-        String[] selectionArgs = {
-                String.valueOf(id)
-        };
-        // クエリの実行
-        Cursor cursor = db.query(TODO_TABLE_NAME, projection, selection, selectionArgs, null, null, null);
-        if (cursor.moveToFirst()) {
-            TodoEntity entity = new TodoEntity();
-            entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
-            entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
-            if (!cursor.isNull(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE))) {
-                entity.setDeadline(cursor.getLong(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE)));
+        SQLiteDatabase db = null;
+        try {
+            db = getReadableDatabase();
+            // 取得するカラムのリストを定義する
+            // 固定的になるので、static finalな定義にしてもいいかもしれない
+            String[] projection = {
+                    BaseColumns._ID,
+                    TODO_COLUMN_NAME_TITLE,
+                    TODO_COLUMN_NAME_DEADLINE,
+            };
+            // 条件文
+            String selection = BaseColumns._ID + " = ?";
+            // 条件のパラメータ
+            String[] selectionArgs = {
+                    String.valueOf(id)
+            };
+            // クエリの実行
+            Cursor cursor = db.query(TODO_TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+            if (cursor.moveToFirst()) {
+                TodoEntity entity = new TodoEntity();
+                entity.setId(cursor.getLong(cursor.getColumnIndex(BaseColumns._ID)));
+                entity.setTitle(cursor.getString(cursor.getColumnIndex(TODO_COLUMN_NAME_TITLE)));
+                if (!cursor.isNull(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE))) {
+                    entity.setDeadline(cursor.getLong(cursor.getColumnIndex(TODO_COLUMN_NAME_DEADLINE)));
+                }
+                return entity;
             }
-            return entity;
+
+        } finally {
+            if (db != null) db.close();
         }
 
         return null;
     }
 
     public int updateTodo(TodoEntity entity) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        SQLiteDatabase db = null;
         try {
+            db = getWritableDatabase();
+            db.beginTransaction();
             // 条件文
             String selection = BaseColumns._ID + " = ?";
             // 条件のパラメータ
@@ -210,7 +225,10 @@ public class TodoOpenHelper extends SQLiteOpenHelper {
             db.setTransactionSuccessful();
             return count;
         } finally {
-            db.endTransaction();
+            if (db != null) {
+                db.endTransaction();
+                db.close();
+            }
         }
     }
 

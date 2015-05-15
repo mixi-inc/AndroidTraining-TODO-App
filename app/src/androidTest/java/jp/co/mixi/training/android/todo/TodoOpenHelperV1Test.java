@@ -41,16 +41,24 @@ public class TodoOpenHelperV1Test extends AndroidTestCase {
 
     /**
      * V1のDBにはdeadlineカラムが存在しないのでエラー
+     *
      * @throws Exception
      */
     @Test(expected = SQLiteException.class)
     public void onUpgradeBefore() throws Exception {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.execSQL(getInsertSqlV2("todo", 1, "title", new Date().getTime()));
+        SQLiteDatabase db = null;
+        try {
+            db = helper.getWritableDatabase();
+            db.execSQL(getInsertSqlV2("todo", 1, "title", new Date().getTime()));
+
+        } finally {
+            if (db != null) db.close();
+        }
     }
 
     /**
      * マイグレーション後はdeadlineカラムが存在しているのでinsert成功
+     *
      * @throws Exception
      */
     @Test
@@ -60,8 +68,8 @@ public class TodoOpenHelperV1Test extends AndroidTestCase {
         Date date = new Date();
         db.execSQL(getInsertSqlV2("todo", 1, "title", date.getTime()));
         TodoEntity entity = helperV2.findTodoById(1);
-        assertEquals("title",entity.getTitle());
-        assertEquals(date,entity.getDeadline());
+        assertEquals("title", entity.getTitle());
+        assertEquals(date, entity.getDeadline());
     }
 
     private String getInsertSqlV2(String tableName, int id, String title, long deadline) {

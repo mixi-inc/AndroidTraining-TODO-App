@@ -49,9 +49,10 @@ public class TodoOpenHelperTest extends AndroidTestCase {
         entity.setId(1);
         entity.setTitle("sample");
         helper.insertTodo(entity);
-        SQLiteDatabase db = helper.getReadableDatabase();
+        SQLiteDatabase db = null;
         Cursor c = null;
         try {
+            db = helper.getReadableDatabase();
             c = db.rawQuery("select * from todo", null);
             c.moveToFirst();
             assertEquals(1, c.getCount());
@@ -59,6 +60,7 @@ public class TodoOpenHelperTest extends AndroidTestCase {
             assertEquals(1, c.getLong(c.getColumnIndex("_id")));
         } finally {
             if (c != null) c.close();
+            if (db != null) db.close();
         }
     }
 

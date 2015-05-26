@@ -1,10 +1,14 @@
 package jp.co.mixi.training.android.todo;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -26,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int INPUT_TODO_REQUEST_CODE = 10;
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +40,18 @@ public class MainActivity extends ActionBarActivity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
+
+        Intent intent = new ReminderNotificationSender.IntentBuilder(this)
+                .setTitle("たいとる")
+                .setId(1)
+                .setSmallIconId(R.drawable.ic_launcher)
+                .setTicker("てぃっかー")
+                .setText("てきすと")
+                .build();
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // kitkat以前ならam.setでOK
+        am.setExact(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pendingIntent);
     }
 
 

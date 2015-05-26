@@ -1,9 +1,14 @@
 package jp.co.mixi.training.android.todo;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 
 public class ReminderNotificationSender extends BroadcastReceiver {
     private static String CONTENT_TITLE_NAME = "content_title";
@@ -16,12 +21,30 @@ public class ReminderNotificationSender extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        // TODO: This method is called when the BroadcastReceiver is receiving
-        // an Intent broadcast.
-        throw new UnsupportedOperationException("Not yet implemented");
+    public void onReceive(Context context, Intent receivedIntent) {
+        // 起動対象を設定
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        Notification notification = builder.setWhen(System.currentTimeMillis())
+                .setContentTitle(receivedIntent.getStringExtra(CONTENT_TITLE_NAME))
+                .setContentText(receivedIntent.getStringExtra(CONTENT_TEXT_NAME))
+                // iconのデフォルトはとりあえずランチャーアイコン
+                .setSmallIcon(receivedIntent.getIntExtra(SMALL_ICON_NAME, R.drawable.ic_launcher))
+                .setTicker(receivedIntent.getStringExtra(TICKER_NAME))
+                // この辺りの設定もbuilderに含めて設定できるようにしてもいいかもしれない
+                .setOnlyAlertOnce(true)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle())
+                .build();
+        NotificationManager manager = (NotificationManager) context.getSystemService(Service.NOTIFICATION_SERVICE);
+        manager.notify(receivedIntent.getIntExtra(ID_NAME, 0),notification);
     }
 
+    /**
+     * 必要とするIntentの内容が複雑なのでbuilderでIntentを組み立てる
+     */
     public static class IntentBuilder {
         private final Context context;
 

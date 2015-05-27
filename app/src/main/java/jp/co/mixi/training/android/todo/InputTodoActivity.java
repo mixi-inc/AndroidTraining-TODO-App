@@ -7,7 +7,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
+
+import java.util.Calendar;
+import java.util.Date;
 
 import jp.co.mixi.training.android.todo.entity.TodoEntity;
 
@@ -25,6 +31,11 @@ public class InputTodoActivity extends ActionBarActivity {
         Intent intent = getIntent();
         final long entityId;
         long paramEntityId = 0;
+        final CheckBox deadlineEnable = (CheckBox) findViewById(R.id.deadlineCheckBox);
+        final DatePicker datePicker = (DatePicker) findViewById(R.id.deadlineDatePicker);
+        final TimePicker timePicker = (TimePicker) findViewById(R.id.deadlineTimePicker);
+        timePicker.setIs24HourView(true);
+        Date deadlineDate = null;
         if (intent != null) {
             // 前の画面から渡ってきたパラメータをチェックする
             String todoJson = intent.getStringExtra(TODO);
@@ -33,8 +44,19 @@ public class InputTodoActivity extends ActionBarActivity {
                 TodoEntity entity = TodoEntity.fromJson(todoJson);
                 todoText.setText(entity.getTitle());
                 paramEntityId = entity.getId();
+                deadlineDate = entity.getDeadline();
             }
         }
+        // deadlineがある場合だけ設定
+        if (deadlineDate != null) {
+            deadlineEnable.setChecked(true);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(deadlineDate);
+            datePicker.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+            timePicker.setCurrentHour(cal.get(Calendar.HOUR_OF_DAY));
+            timePicker.setCurrentMinute(cal.get(Calendar.MINUTE));
+        }
+
         entityId = paramEntityId;
         submitButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -42,6 +64,11 @@ public class InputTodoActivity extends ActionBarActivity {
                                                 TodoEntity entity = new TodoEntity();
                                                 entity.setId(entityId);
                                                 entity.setTitle(todoText.getText().toString());
+                                                if (deadlineEnable.isChecked()) {
+                                                    Calendar cal = Calendar.getInstance();
+                                                    cal.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(), timePicker.getCurrentHour(), timePicker.getCurrentMinute());
+                                                    entity.setDeadline(cal.getTime());
+                                                }
                                                 Activity activity = InputTodoActivity.this;
                                                 TodoSaveService.startActionSave(activity, entity);
                                                 activity.finish();

@@ -25,6 +25,12 @@
             android:name=".TodoSaveService"
             android:exported="false" >
         </service>
+
+        <receiver
+            android:name=".ReminderNotificationSender"
+            android:enabled="true"
+            android:exported="false" >
+        </receiver>
     </application>
 
 </manifest>

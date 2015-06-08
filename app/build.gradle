@@ -13,6 +13,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [appName: "@string/app_name"]
+        buildConfigField "String", "API_SERVER", getProperty("devApiServer")
     }
     buildTypes {
         debug{
@@ -20,6 +21,7 @@ android {
             manifestPlaceholders = [appName: "TODO-Dev"]
         }
         release {
+            buildConfigField "String", "API_SERVER", getProperty("apiServer")
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
